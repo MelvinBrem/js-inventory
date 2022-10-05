@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"ws\" \"tsc --watch\" \"sass --watch src/style/style.scss:dist/style/style.css\""
+    "dev": "concurrently \"ws\" \"tsc --watch\" \"sass --watch src/style/style.scss:dist/style/style.css\" \"open http://localhost:8000\""
   },
   "devDependencies": {
     "sass": "^1.35.2",
