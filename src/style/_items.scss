@@ -37,9 +37,13 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
-    &__counter{
-        content: "9mmx14mm";
+    &__countable::after{
+        content: attr(item_amount);
         display: block;
         background: rgba($color_black, 0.5);
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        padding: 4px 4px;
     }
 }

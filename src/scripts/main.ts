@@ -1,7 +1,6 @@
-// --- Global variables ---
-const sprite_size: number = (20 * 4);
-
-// --- Classes ---
+/*=====================================================================================
+Classes
+=======================================================================================*/
 class inventory {
    constructor(
       public name: string,
@@ -13,7 +12,6 @@ class inventory {
       this.y = y;
    }
 }
-
 class item {
    constructor(
       public id: number,
@@ -34,7 +32,10 @@ class item {
    }
 }
 
-// -- Game object ---
+/*=====================================================================================
+The Game Object
+=======================================================================================*/
+
 const game = {
    inventory: new inventory('default', 10, 5),
    items: [
@@ -45,148 +46,54 @@ const game = {
    ],
 }
 
-// --- Helper functions ---
+/*=====================================================================================
+Helper functions
+=======================================================================================*/
 
-/**
- * Throws a log error message
- * @param parameters 
- * @param error_message 
- */
 function throw_error(parameters: IArguments, error_message: string) {
    console.error(`Error: ${throw_error.caller.name}(): ` + error_message);
 }
 
-/**
- * Check if an item can have an "amount"
- * @param item 
- * @returns 
- */
-function isCountable(item: item) {
-   if (game.items[item.id].max_amount !== 0) {
+function isCountable(param_item: item) {
+   if (game.items[param_item.id].max_amount !== 0) {
       return true;
    }
 
    return false;
 }
 
-/**
- * Get a cell as an Element by id,
- * Returns nothing if cell does not exist
- * @param cell_id 
- * @returns 
- */
-function getCell(cell_id: number): Element | boolean {
+function getCell(param_cell_id: number): Element {
    const inv_cells: HTMLCollectionOf<Element> = document.getElementsByClassName('inventory__cell');
 
-   // If cell exists in inventory
-   if (cell_id < 0 || cell_id >= inv_cells.length) {
+   if (param_cell_id >= inv_cells.length) {
       throw_error(arguments, `Specified cell does not exist`);
       return;
    }
 
-   const cell_elemnt: Element = document.querySelector('[cell_id="' + cell_id + '"]');
+   const cell_elemnt: Element = document.querySelector('[cell_id="' + param_cell_id + '"]');
    return cell_elemnt;
 }
 
-/**
- * Check if cell is occupied
- * @param cell_id 
- * @returns 
- */
-function isCellOccupied(cell_id: number): boolean {
+function isCellOccupied(param_cell_id: number): boolean {
    const inv_cells: HTMLCollectionOf<Element> = document.getElementsByClassName('inventory__cell');
 
-   if (getCell(cell_id).childNodes.length !== 0) { // =============== Fix this dumbass
+   if (getCell(param_cell_id).childNodes.length !== 0) { // =============== Fix this dumbass
       return true;
    }
 
    return false;
 }
 
-/**
- * Create an item
- * @param param_item_id 
- * @param param_amount 
- * @param param_cell_id 
- * @returns 
- */
-function giveItem(param_item_id: number, param_amount?: number, param_cell_id?: number): Boolean {
-   let item = game.items[param_item_id];
+/*=====================================================================================
+Global variables
+=======================================================================================*/
 
-   // If item exists in game
-   if (item === undefined) {
-      throw_error(arguments, 'No item found with id: ' + param_item_id);
-      return false;
-   }
+const sprite_size: number = (20 * 4);
 
-   // Generate the new item   
-   const new_item: Element = document.createElement('div');
-   new_item.setAttribute('class', 'item');
-   new_item.setAttribute('item_id', item.id.toString());
-   new_item.setAttribute('style', `background-position: -${game.items[param_item_id].sprite_x * sprite_size}px -${game.items[param_item_id].sprite_y * sprite_size}px`)
+/*=====================================================================================
+inventoryInit()
+=======================================================================================*/
 
-   // Amount attribute
-   if (isCountable(game.items[param_item_id])) {
-      if (param_amount !== undefined) {
-         new_item.setAttribute('item_amount', param_amount.toString());
-      } else {
-         new_item.setAttribute('item_amount', game.items[param_item_id].max_amount.toString());
-      }
-   }
-   // Label
-   if (game.items[param_item_id].label !== '') {
-      const new_item_label: Element = document.createElement('span');
-      new_item_label.setAttribute('class', 'item__label');
-      new_item_label.innerHTML = game.items[param_item_id].label;
-
-      new_item.appendChild(new_item_label);
-   }
-
-   // Counter
-   if (isCountable(game.items[param_item_id])) {
-      const new_item_counter: Element = document.createElement('span');
-      new_item_counter.setAttribute('class', 'item__counter');
-
-      new_item.appendChild(new_item_counter);
-   }
-
-   // Determine where the item will be placed
-   const inv_cells: HTMLCollectionOf<Element> = document.getElementsByClassName('inventory__cell');
-
-   let target_cell: number;
-
-   if (param_cell_id !== undefined && !isCellOccupied(param_cell_id)) {
-      target_cell = param_cell_id;
-   } else {
-
-      if (param_cell_id !== undefined) {
-         throw_error(arguments, 'Cell in paramter is already occupied, getting the next free cell');
-      }
-
-      for (let cell = 0; cell < inv_cells.length; cell++) {
-         if (!isCellOccupied(cell)) {
-            target_cell = cell;
-            break;
-         }
-
-         continue;
-      }
-   }
-
-   // If target cell is defined
-   if (target_cell === undefined) {
-      throw_error(arguments, `Target cell "${target_cell}" does not exist`);
-      return;
-   }
-
-   inv_cells[target_cell].appendChild(new_item);
-   return true;
-};
-
-/**
- * Initializes the inventory
- * @returns 
- */
 function inventoryInit() {
    const inv_Y: number = game.inventory.y;
    const inv_X: number = game.inventory.x;
@@ -218,13 +125,87 @@ function inventoryInit() {
    }
 }
 
-// Apply the inventory configuration to the inventory object
+/*=====================================================================================
+giveItem()
+=======================================================================================*/
+
+function giveItem(param_item_id: number, param_amount?: number, param_cell_id?: number): Boolean {
+   let item = game.items[param_item_id];
+
+   if (item === undefined) {
+      throw_error(arguments, 'No item found with id: ' + param_item_id);
+      return false;
+   }
+
+   const new_item: Element = document.createElement('div');
+   new_item.setAttribute('class', 'item');
+   new_item.setAttribute('item_id', item.id.toString());
+   new_item.setAttribute('style', `background-position: -${game.items[param_item_id].sprite_x * sprite_size}px -${game.items[param_item_id].sprite_y * sprite_size}px`)
+
+   if (param_amount !== 0 && isCountable(game.items[param_item_id])) {
+      if (param_amount !== undefined) {
+         new_item.setAttribute('item_amount', param_amount.toString());
+      } else {
+         new_item.setAttribute('item_amount', game.items[param_item_id].max_amount.toString());
+      }
+   }
+   if (game.items[param_item_id].label !== '') {
+      const new_item_label: Element = document.createElement('span');
+      new_item_label.setAttribute('class', 'item__label');
+      new_item_label.innerHTML = game.items[param_item_id].label;
+
+      new_item.appendChild(new_item_label);
+   }
+   if (isCountable(game.items[param_item_id])) {
+      new_item.setAttribute('class', 'item item__countable');
+   }
+
+   // Determine where the item will be placed
+   const inv_cells: HTMLCollectionOf<Element> = document.getElementsByClassName('inventory__cell');
+
+   let target_cell: number = 0;
+
+   if (param_cell_id !== undefined && !isCellOccupied(param_cell_id)) {
+      target_cell = param_cell_id;
+   } else {
+
+      if (param_cell_id !== undefined) {
+         throw_error(arguments, 'Cell in paramter is already occupied, getting the next free cell');
+      }
+
+      for (let cell = 0; cell < inv_cells.length; cell++) {
+         if (!isCellOccupied(cell)) {
+            target_cell = cell;
+            break;
+         }
+
+         continue;
+      }
+   }
+
+   if (target_cell === undefined) {
+      throw_error(arguments, `Target cell is not defined`);
+      return false;
+   }
+
+   inv_cells[target_cell].appendChild(new_item);
+   return true;
+};
+
+
+/*=====================================================================================
+DOMContentLoaded
+=======================================================================================*/
+
 document.addEventListener("DOMContentLoaded", () => {
    inventoryInit();
 
    // Test fill
-   giveItem(6, 0, 1);
-   giveItem(3, 0, 1);
-   giveItem(0, 0, 2);
-   giveItem(2, 0, 3);
+   giveItem(1);
+   giveItem(3);
+   giveItem(2);
+   giveItem(0);
+   giveItem(1);
+   giveItem(3);
+   giveItem(0);
 });
