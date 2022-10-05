@@ -1,0 +1,45 @@
+.item{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-image: url('../../assets/items.png');
+    background-size: 600%;
+    image-rendering: pixelated;
+    filter: drop-shadow(-5px 5px 5px rgba($color_black, 0.5));
+    transition: $transition_default;
+    overflow: hidden;
+    transform: scale(1);
+    &:hover{
+        cursor: pointer;
+        transform: scale(1.1);
+        filter: drop-shadow(-5px 5px 3px rgba($color_black, 0.5));
+        .item__label{
+            padding: 4px 4px;
+            max-height: $sprite_size;
+            overflow-y: scroll;
+        }
+    }
+    &__label{
+        background: rgba($color_black, 0.5);
+        padding: 0px 4px;
+        max-height: 0px;
+        width: 100%;
+        height: auto;
+        display: block;
+        box-sizing: border-box;
+        position: absolute;
+        bottom: 0px;
+        left: 0px;
+        transition: $transition_default;
+        &::-webkit-scrollbar {
+            display: none;
+          }
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    &__counter{
+        content: "9mmx14mm";
+        display: block;
+        background: rgba($color_black, 0.5);
+    }
+}

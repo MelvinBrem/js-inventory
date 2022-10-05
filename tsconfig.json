@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "outDir": "dist/scripts/",
+        "esModuleInterop": true,
+        "module": "commonjs",
+        "lib": ["es2017", "es6", "dom"],
+        "target": "es6"
+    },
+    "include": ["src/scripts/*"],
+}

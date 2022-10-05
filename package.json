@@ -1,0 +1,14 @@
+{
+  "name": "melvin",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"ws\" \"tsc --watch\" \"sass --watch src/style/style.scss:dist/style/style.css\""
+  },
+  "devDependencies": {
+    "sass": "^1.35.2",
+    "typescript": "^4.8.4",
+    "concurrently": "^7.4",
+    "local-web-server": "^5.2"
+  }
+}
