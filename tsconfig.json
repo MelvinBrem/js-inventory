@@ -1,6 +1,8 @@
 {
     "compilerOptions": {
         "esModuleInterop": true,
+        "noEmit": true,
+        "allowImportingTsExtensions": true,
         "module": "AMD",
         "lib": [
             "es2017",
@@ -12,6 +14,6 @@
         "outDir": "./dist/scripts",
     },
     "include": [
-        "./src/scripts"
+        "./src/scripts/main.ts"
     ]
 }

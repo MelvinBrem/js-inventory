@@ -1,4 +1,9 @@
-.item{
+.item {
+
+    &--dragging {
+        opacity: 0.1;
+    }
+
     position: relative;
     z-index: 0;
     width: 100%;
@@ -10,17 +15,20 @@
     transition: $transition_default;
     overflow: hidden;
     transform: scale(1);
-    &:hover{
+
+    &:hover {
         cursor: pointer;
         transform: scale(1.1);
         filter: drop-shadow(-5px 5px 3px rgba($color_black, 0.5));
-        .item__label{
+
+        .item__label {
             padding: 4px 4px;
             max-height: $sprite_size;
             overflow-y: scroll;
         }
     }
-    &__label{
+
+    &__label {
         background: rgba($color_black, 0.5);
         padding: 0px 4px;
         max-height: 0px;
@@ -32,15 +40,18 @@
         bottom: 0px;
         left: 0px;
         transition: $transition_default;
+
         &::-webkit-scrollbar {
             display: none;
-          }
+        }
+
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
-    &__countable:not(.item__magclip)::after{
+
+    &__countable:not(.item__magclip)::after {
         z-index: 1;
-        content: attr(item_amount);
+        content: attr(item_amount)"/" attr(item_capacity);
         display: block;
         background: rgba($color_black, 0.5);
         position: absolute;
@@ -48,24 +59,29 @@
         right: 0px;
         padding: 4px 4px;
     }
-    &.item__magclip{
-        &::before, &::after{
+
+    &.item__magclip {
+
+        &::before,
+        &::after {
             content: '';
             position: absolute;
             right: 8px;
             width: 4px;
             z-index: 1;
         }
-        &::before{
+
+        &::before {
             height: calc(100% - 16px);
             bottom: 50%;
             transform: translateY(50%);
             background-color: rgba($color_black, 0.5);
         }
-        &::after{
-            height: calc((attr(item_amount '%') / attr(item_max_amount '%')) * 100%); // No workie :(
+
+        &::after {
+            height: calc((attr(item_amount '%') / attr(item_capacity '%')) * 100%); // No workie :(
             bottom: 8px;
-            background-color: $color_white; 
+            background-color: $color_white;
         }
     }
 }

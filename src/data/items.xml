@@ -1,0 +1,11 @@
+<items>
+    <item>
+        <name></name>
+        <label></label>
+        <type></type>
+        <sprite_y></sprite_y>
+        <sprite_x></sprite_x>
+        <caliber></caliber>
+        <max_amount></max_amount>
+    </item>
+</items>
