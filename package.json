@@ -2,8 +2,8 @@
   "name": "yarnparcel",
   "version": "1.0.0",
   "devDependencies": {
-    "@parcel/transformer-sass": "2.8.3",
-    "parcel": "^2.8.3"
+    "@parcel/transformer-sass": "*",
+    "parcel": "*"
   },
   "license": "MIT",
   "targets": {

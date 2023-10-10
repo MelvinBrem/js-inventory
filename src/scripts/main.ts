@@ -6,8 +6,13 @@ import { Caliber } from './classes/Caliber'
 import { Item } from './classes/Item'
 
 /*=====================================================================================
-Create global objects
+Create important objects
 =======================================================================================*/
+
+const Inventory = {
+   x: 10,
+   y: 5
+};
 
 const Calibers = [
    new Caliber('762x39', '7.62x39mm'),
@@ -77,13 +82,16 @@ const itemData = [
    }
 ];
 
-const Items = itemData.map((data) => new Item(data.name, data.label, data.flavor_text, data.type, data.sprite_y, data.sprite_x, data.caliber, data.capacity));
-
-
-const Inventory = {
-   x: 10,
-   y: 5
-};
+const Items = itemData.map((data) => new Item(
+   data.name,
+   data.label,
+   data.flavor_text,
+   data.type,
+   data.sprite_y,
+   data.sprite_x,
+   data.caliber,
+   data.capacity
+));
 
 /*=====================================================================================
 Global variables
@@ -98,9 +106,7 @@ inventoryInit()
 function inventoryInit(): void {
    const inv_container: Element = document.querySelector('.inventory__container');
 
-   if (!inv_container) {
-      return;
-   }
+   if (!inv_container) return;
 
    const inv_Y: number = Inventory.y;
    const inv_X: number = Inventory.x;
@@ -109,7 +115,7 @@ function inventoryInit(): void {
    for (let i = 0; i < inv_cell_amount; i++) {
       const temp_cell: Element = document.createElement('div');
       temp_cell.classList.add('inventory__cell');
-      temp_cell.setAttribute('cell_id', i.toString());
+      temp_cell.setAttribute('cell-id', i.toString());
 
       inv_container.appendChild(temp_cell);
    }
@@ -123,42 +129,38 @@ function inventoryInit(): void {
 
    inv_container.setAttribute('style', 'grid-template-columns: ' + grid_template_columns_value);
 
-   // ===== Init MutationObserver =====
-   if (inv_container) {
-
-      var observer = new MutationObserver(function (mutations) {
-         mutations.forEach(function (mutation) {
-            setDragEventHandlers();
-         });
+   // ===== Init MutationObserver to make sure those items have and keep their eventHandlers =====
+   var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+         setDragEventHandlers();
       });
+   });
 
-      observer.observe(inv_container, {
-         attributes: true,
-         childList: true
-      });
-
-   }
+   observer.observe(inv_container, {
+      attributes: true,
+      childList: true
+   });
 }
 
 /*=====================================================================================
-Draggin' (my nuts)
+Draggin'
 =======================================================================================*/
 
 function setDragEventHandlers() {
 
-   function dragStart(e) {
-      e.dataTransfer.setData('text/plain', e.target.id);
-
-      setTimeout(() => {
-         e.target.classList.add('item--dragging');
-      }, 0);
-   }
+   // ===== DragStart =====
 
    const inv_items: NodeListOf<Element> = document.querySelectorAll('.item');
+
+   function dragStart(e) {
+      e.dataTransfer.setData('drag_el_id', e.target.getAttribute('item-id'));
+   }
 
    inv_items.forEach(item => {
       item.addEventListener('dragstart', dragStart);
    });
+
+   // ===== Other =====
 
    function dragEnter(e) {
       e.preventDefault();
@@ -171,24 +173,26 @@ function setDragEventHandlers() {
    }
 
    function dragLeave(e) {
+      e.preventDefault();
       e.target.classList.remove('inventory__cell--drag-hover');
    }
 
    function drop(e) {
+      e.preventDefault();
       // Check if item can be dropped on cell
-      const drop_node: Node = e.target;
-      const drop_element: Element = e.target;
+      const drop_el: Element = e.target;
+      const drop_cell: Element = drop_el.closest('.inventory__cell');
+      if (!drop_cell) return;
 
-      console.log(isCellOccupied(parseInt(drop_element.getAttribute('cell_id'))));
+      drop_cell.classList.remove('inventory__cell--drag-hover');
 
-      drop_element.classList.remove('inventory__cell--drag-hover');
+      const drop_cell_id: any = drop_cell.getAttribute('cell-id');
+      if (!drop_cell_id) return;
 
-      const id = e.dataTransfer.getData('text/plain');
-      const currently_dragging = document.getElementById(id);
+      const drag_el_id = e.dataTransfer.getData("drag_el_id");
+      if (!drag_el_id) return;
 
-      drop_node.appendChild(currently_dragging);
-
-      currently_dragging.classList.remove('item--dragging');
+      combineItemCell(drag_el_id, drop_cell_id);
    }
 
    const inv_cells: NodeListOf<Element> = document.querySelectorAll('.inventory__cell');
@@ -198,12 +202,62 @@ function setDragEventHandlers() {
       cell.addEventListener('dragover', dragOver);
       cell.addEventListener('dragleave', dragLeave);
       cell.addEventListener('drop', drop);
+
+      document.querySelector('.inventory__background').addEventListener('dragenter', function () { })
+      document.querySelector('.inventory__background').addEventListener('dragover', function () { });
+      document.querySelector('.inventory__background').addEventListener('dragleave', function () { });
+      document.querySelector('.inventory__background').addEventListener('drop', function () { });
+
    });
 }
 
 /*=====================================================================================
 Helper functions
 =======================================================================================*/
+
+/*
+Combine an item and a cell, see what happens
+*/
+function combineItemCell(param_item_el_id: number, param_cell_el_id: number) {
+
+   if (!param_item_el_id || !param_cell_el_id) return;
+
+   const item_el: Element = getItemElementByID(param_item_el_id);
+   const cell_el: Element = getCellElementByID(param_cell_el_id);
+
+   console.log(item_el);
+
+
+   if (!isCellOccupied(param_cell_el_id)) {
+      // Not occupied, move item element here
+      cell_el.appendChild(item_el);
+
+   } else {
+      // occupied, see what shit you can do with these two items
+      const item_name = document.querySelector('item-name');
+   }
+
+}
+
+function getItemElementByID(param_item_id: number): any {
+   const item_element: Element = document.querySelector('[item-id="' + param_item_id + '"]');
+   if (item_element === undefined) {
+      console.error('Specified item element does not exist');
+      return false;
+   }
+
+   return item_element;
+}
+
+function getCellElementByID(param_cell_id: number): any {
+   const cell_element: Element = document.querySelector('[cell-id="' + param_cell_id + '"]');
+   if (cell_element === undefined) {
+      console.error('Specified cell element does not exist');
+      return false;
+   }
+
+   return cell_element;
+}
 
 function getRandomInt(max) {
    return Math.floor(Math.random() * max);
@@ -217,19 +271,9 @@ function isCountable(param_item: Item): boolean {
    return true;
 }
 
-function getCell(param_cell_id: number): any {
-   const cell_element: Element = document.querySelector('[cell_id="' + param_cell_id + '"]');
-   if (cell_element === undefined) {
-      console.error('Specified cell does not exist');
-      return false;
-   }
-
-   return cell_element;
-}
-
 function isCellOccupied(param_cell_id: number): boolean {
 
-   if (getCell(param_cell_id).childNodes.length !== 0) {
+   if (getCellElementByID(param_cell_id).childNodes.length !== 0) {
       return true;
    }
 
@@ -262,29 +306,21 @@ function giveItem(param_item_name: string, param_amount?: number, param_cell_id?
 
    const new_item: Element = document.createElement('div');
    new_item.classList.add('item');
+
    new_item.setAttribute('draggable', 'true');
-   new_item.setAttribute('item_name', param_item.name.toString());
-   // Set unique id
-   new_item.setAttribute('id', getRandomInt(999999999999).toString());
+   new_item.setAttribute('item-id', getRandomInt(999999999999).toString());
+   new_item.setAttribute('item-name', param_item.name.toString());
    new_item.setAttribute('style', `background-position: -${param_item.sprite_x * sprite_size}px -${param_item.sprite_y * sprite_size}px`)
-
-   if (param_item.label !== '') {
-      const new_item_label: Element = document.createElement('span');
-      new_item_label.classList.add('item__label');
-      new_item_label.innerHTML = param_item.label;
-
-      new_item.appendChild(new_item_label);
-   }
 
    // ===== Countable additions ====
    if (isCountable(param_item)) {
       if (param_amount !== undefined) {
-         new_item.setAttribute('item_amount', param_amount.toString());
+         new_item.setAttribute('item-amount', param_amount.toString());
       } else {
-         new_item.setAttribute('item_amount', param_item.capacity.toString());
+         new_item.setAttribute('item-amount', param_item.capacity.toString());
       }
       new_item.classList.add('item__countable');
-      new_item.setAttribute('item_capacity', param_item.capacity.toString());
+      new_item.setAttribute('item-capacity', param_item.capacity.toString());
 
       // ===== Magclip type additions ====
       if (param_item.type == "MagClip") {
@@ -324,11 +360,10 @@ On OMContentLoaded
 document.addEventListener("DOMContentLoaded", () => {
    inventoryInit();
 
-   // Test fill
    giveItem('ammobox_762x39', 12);
    giveItem('ammobox_9x19');
    giveItem('ammobox_9x19', 2);
-   giveItem('mag_s_762x39', 8);
+   giveItem('mag_s_762x39', 7);
    giveItem('mag_m_762x39', 4);
    giveItem('mag_xl_762x39');
    giveItem('mag_9x19');
