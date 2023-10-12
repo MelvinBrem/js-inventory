@@ -1,8 +1,10 @@
-.tooltip{
+.tooltip {
+    pointer-events: none;
     position: absolute;
     z-index: 999;
     padding: 20px;
     background-color: rgba(0, 0, 0, 0.4);
     height: fit-content;
     width: fit-content;
+    opacity: 0;
 }

@@ -9,11 +9,6 @@ import { Item } from './classes/Item'
 Create important objects
 =======================================================================================*/
 
-const Inventory = {
-   x: 10,
-   y: 5
-};
-
 const Calibers = [
    new Caliber('762x39', '7.62x39mm'),
    new Caliber('9x19', '9x19mm')
@@ -93,11 +88,32 @@ const Items = itemData.map((data) => new Item(
    data.capacity
 ));
 
+const Inventory = {
+   x: 5,
+   y: 3,
+   cells: [
+      // Example
+      // {
+      //    item_id: 1,
+      //    item_name: 'ammobox_762x39'
+      // }
+   ]
+};
+
 /*=====================================================================================
 Global variables
 =======================================================================================*/
 
 const sprite_size: number = (20 * 4);
+
+/*=====================================================================================
+Debug stuff
+=======================================================================================*/
+
+function updateDebugInfo() {
+   const debug_el: HTMLElement = document.querySelector('.info-cells');
+   debug_el.innerHTML = JSON.stringify(Items, null, 4);
+}
 
 /*=====================================================================================
 inventoryInit()
@@ -126,13 +142,14 @@ function inventoryInit(): void {
       grid_template_columns_value += 'auto ';
    }
    grid_template_columns_value += ';';
-
    inv_container.setAttribute('style', 'grid-template-columns: ' + grid_template_columns_value);
 
-   // ===== Init MutationObserver to make sure those items have and keep their eventHandlers =====
+   // ===== Init MutationObserver to make sure those items have and keep their eventHandlers and stuff =====
    var observer = new MutationObserver(function (mutations) {
       mutations.forEach(function (mutation) {
          setDragEventHandlers();
+         setTooltipEventHandlers();
+         updateDebugInfo();
       });
    });
 
@@ -140,6 +157,28 @@ function inventoryInit(): void {
       attributes: true,
       childList: true
    });
+}
+
+/*=====================================================================================
+Tooltipz
+=======================================================================================*/
+
+function setTooltipEventHandlers() {
+   const tooltip_el: HTMLElement = document.querySelector('.tooltip');
+   const inv_items: NodeListOf<Element> = document.querySelectorAll('.item');
+
+   inv_items.forEach(item => {
+      item.addEventListener('mouseenter', (e) => {
+         const target_item_el: Element = e.target;
+         tooltip_el.style.opacity = '1';
+      });
+
+      item.addEventListener('mouseleave', (e) => {
+         const target_item_el: Element = e.target;
+         tooltip_el.style.opacity = '0';
+      });
+   });
+
 }
 
 /*=====================================================================================
@@ -184,7 +223,7 @@ function setDragEventHandlers() {
       const drop_cell: Element = drop_el.closest('.inventory__cell');
       if (!drop_cell) return;
 
-      drop_cell.classList.remove('inventory__cell--drag-hover');
+      drop_el.classList.remove('inventory__cell--drag-hover');
 
       const drop_cell_id: any = drop_cell.getAttribute('cell-id');
       if (!drop_cell_id) return;
@@ -202,12 +241,6 @@ function setDragEventHandlers() {
       cell.addEventListener('dragover', dragOver);
       cell.addEventListener('dragleave', dragLeave);
       cell.addEventListener('drop', drop);
-
-      document.querySelector('.inventory__background').addEventListener('dragenter', function () { })
-      document.querySelector('.inventory__background').addEventListener('dragover', function () { });
-      document.querySelector('.inventory__background').addEventListener('dragleave', function () { });
-      document.querySelector('.inventory__background').addEventListener('drop', function () { });
-
    });
 }
 
@@ -215,17 +248,12 @@ function setDragEventHandlers() {
 Helper functions
 =======================================================================================*/
 
-/*
-Combine an item and a cell, see what happens
-*/
-function combineItemCell(param_item_el_id: number, param_cell_el_id: number) {
+export function combineItemCell(param_item_el_id: number, param_cell_el_id: number) {
 
    if (!param_item_el_id || !param_cell_el_id) return;
 
    const item_el: Element = getItemElementByID(param_item_el_id);
    const cell_el: Element = getCellElementByID(param_cell_el_id);
-
-   console.log(item_el);
 
 
    if (!isCellOccupied(param_cell_el_id)) {
@@ -236,7 +264,6 @@ function combineItemCell(param_item_el_id: number, param_cell_el_id: number) {
       // occupied, see what shit you can do with these two items
       const item_name = document.querySelector('item-name');
    }
-
 }
 
 function getItemElementByID(param_item_id: number): any {
@@ -353,6 +380,14 @@ function giveItem(param_item_name: string, param_amount?: number, param_cell_id?
 
 };
 
+document.addEventListener('mousemove', function (e) {
+   let circle: HTMLElement = document.querySelector('.tooltip');
+   let left: number = e.clientX;
+   let top: number = e.clientY;
+   circle.style.left = (left + 15) + 'px';
+   circle.style.top = top + 'px';
+});
+
 /*=====================================================================================
 On OMContentLoaded
 =======================================================================================*/
@@ -369,4 +404,6 @@ document.addEventListener("DOMContentLoaded", () => {
    giveItem('mag_9x19');
 
    setDragEventHandlers();
+   setTooltipEventHandlers();
+   updateDebugInfo();
 });
